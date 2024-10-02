@@ -6,7 +6,7 @@ format:
   html:
     theme: cosmo  # zephyr pulse, sketchy, default, cosmo, vapor etc
 author:
-  - name: Your Name
+  - name: Your Name Here
     email: youremailt@appstate.edu
     affiliation:
       - name: Appalachian State University
