@@ -1,0 +1,115 @@
+---
+title: "Partial Replication of [Bicycle Sharing in Seattle](https://amber.rbind.io/2016/11/10/bicyclesseattle/)"
+date: last-modified
+date-format: "[Last modified on] MMMM DD, YYYY HH:mm:ss zzz"
+format: 
+  html:
+    theme: cosmo  # zephyr pulse, sketchy, default, cosmo, vapor etc
+author:
+  - name: Your Name
+    email: youremailt@appstate.edu
+    affiliation:
+      - name: Appalachian State University
+        city: Boone
+        state: NC  
+        url: https://www.appstate.edu/
+abstract: >
+  This is a replication of select portions of Amber Thomas's original post [Bicycle Sharing in Seattle](https://amber.rbind.io/2016/11/10/bicyclesseattle/) from November 10, 2016.
+keywords:
+  - R
+  - data viz
+license: "CC BY"  
+code-fold: false
+---
+
+![Someone is bikepacking!](./pics/bikePacking.jpg)
+
+
+# Introduction
+
+This is an exploration of bicycle-sharing data in the city of Seattle, WA (USA) from **October 2014 - April 2015** not the data Amber used that was **October 2014 - August 2016**. I hope to eventually combine this data with other forms of ride-sharing and transportation in the city, but this will be the first step.
+
+Time to get started!
+
+```{r}
+#| label: "setup"
+#| include: false
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, comment = NA, fig.align = "center")
+```
+
+## Loading Necessary Packages
+
+```{r}
+#| label: "needed"
+# For data manipulation and tidying
+library(dplyr)
+library(lubridate)
+library(tidyr)
+
+# For mapping
+library(ggmap)
+library(mapproj)
+
+# For data visualizations
+library(ggplot2)
+
+# For modeling and machine learning
+library(caret)
+```
+
+## Importing Data
+
+All of the data can be downloaded from [Kaggle](https://www.kaggle.com/pronto/cycle-share-dataset). This project contains 3 data sets and each file is imported and inspected independently using the `read.csv()` function.
+
+:::{.callout-warning}
+The data from [Kaggle](https://www.kaggle.com/pronto/cycle-share-dataset) is not the same data that was originally analyzed by Amber.  Specifically, the number of rows in the `trip` dataset downloaded from Kaggle is 50,793 compared to the 236,065 rows Amber analyzes.  The Pronto web site for Seattle is no longer available. 
+:::
+
+
+```{r}
+station <- read.csv(file = "./data/station.csv",
+                    header = TRUE,
+                    stringsAsFactors = FALSE)
+
+trip <- read.csv(file = "./data/trip.csv",
+                 header = TRUE,
+                 stringsAsFactors = FALSE)
+
+weather <- read.csv(file = "./data/weather.csv",
+                    header = TRUE,
+                    stringsAsFactors = FALSE)
+```
+
+Ok, let's take a look at each of these data files.
+
+### Data Structures and Variables
+
+#### `station`
+
+```{r}
+#| echo: false
+glimpse(station)
+```
+
+There are 9 variables in the data `station` data frame:
+
+1. `station_id`: The individual ID number for a bike station
+
+2. `name`: The name of that station ID, also appears to be the rough location of the station
+
+3. `lat`: The latitude of the station
+
+4. `long`: The longitude of the station
+
+5. `install_date`: Date that station was placed in service (MM/DD/YYYY format)
+
+6. `install_dockcount`: Number of docks (bike positions) at each station on the installation date
+
+7. `modification_date`: Date that station was modified, resulting in a change in location or dock count (MM/DD/YYYY format)
+
+8. `current_dockcount`: Number of docks at each station on 8/31/2016
+
+9. `decommission_date`: Date that station was placed out of service (MM/DD/YYYY format)
+
+#### `trip`
+
